@@ -1,0 +1,23 @@
+language: node_js #what programming laguage we are using
+node_js: #tell travis what version of node we want to use
+  - '8'
+dist: trusty #this distribution is used as a base image for the virtual machine that is going to be created for us
+services: #specify some number of services we ant to be created for our project like modules
+  - mongodb
+  - redis-server
+
+env: #it's going to be an array of environment variables that we ant to have set up any timem our application is ran on the CI server
+  - NODE_ENV=ci PORT=3000 #anytime our express starts on travis ci server, it will try to connect to port 3000
+cache: #we can configure travis and tell it that after it installs the node modules directory at least one time, it should cache that folder for future builds to speed up build process significantly
+  directories:
+    - node_modules
+    - client/node_modules #for nested directories
+install: #commands we ant to get executed in the command line, like install the node modules with npm start
+  - npm install
+  - npm run build
+script: #where will start our server and then execute some tests
+  #nohup: if the shell is closed, dont kill anything this command creates
+  #&: run this command in a subshell(in the background)
+  - nohup npm run start &
+  - sleep 3 #sit around and wait for 3 seconds, gives a bit of time to start our server up
+  - npm run test
